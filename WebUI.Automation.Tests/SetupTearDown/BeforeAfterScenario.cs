@@ -7,6 +7,7 @@ using OpenQA.Selenium;
 using TechTalk.SpecFlow;
 using WebUI.Automation.Pages;
 using WebUI.Automation.WebDriver;
+using OpenQA.Selenium.Support.UI;
 
 namespace WebUI.Automation.Tests.SetupTearDown
 {
@@ -38,6 +39,7 @@ namespace WebUI.Automation.Tests.SetupTearDown
 			RegisterOptions();
 			RegisterWebDriver();
 			RegisterRepos();
+            RegisterWebDriverWait();
 			_webDriver.MaximiseWindow();
 		}
 
@@ -66,6 +68,12 @@ namespace WebUI.Automation.Tests.SetupTearDown
 			var userManagementRepository = new UserManagementRepository(Settings.ConnectionString);
 			_objectContainer.RegisterInstanceAs(userManagementRepository);
 		}
+
+        private void RegisterWebDriverWait()
+        {
+            var wait = new WebDriverWait(_webDriver, Settings.PageTimeout);
+            _objectContainer.RegisterInstanceAs(wait);
+        }
 
 		private void DisposeWebDriver()
 		{
