@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+<title>WebUI.Automation.Tests Test Execution Report</title>
+<script type="text/javascript" src="sorttable.js"></script>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
+<script type="text/javascript">
+    /**
+    * jQuery.fn.sortElements
+    * --------------
+    * #author James Padolsey (http://james.padolsey.com)
+    * #version 0.11
+    * #updated 18-MAR-2010
+    * #url https://raw.github.com/jamespadolsey/jQuery-Plugins/master/sortElements/jquery.sortElements.js
+    * --------------
+    * #param Function comparator:
+    *   Exactly the same behaviour as [1,2,3].sort(comparator)
+    *
+    * #param Function getSortable
+    *   A function that should return the element that is
+    *   to be sorted. The comparator will run on the
+    *   current collection, but you may want the actual
+    *   resulting sort to occur on a parent or another
+    *   associated element.
+    *
+    *   E.g. $('td').sortElements(comparator, function(){
+    *      return this.parentNode;
+    *   })
+    *
+    *   The <td>'s parent (<tr>) will be sorted instead
+    *   of the <td> itself.
+    */
+    jQuery.fn.sortElements = (function() {
+
+        var sort = [].sort;
+
+        return function(comparator, getSortable) {
+
+            getSortable = getSortable || function() { return this; };
+
+            var placements = this.map(function() {
+
+                var sortElement = getSortable.call(this),
+                    parentNode = sortElement.parentNode,
+
+                    // Since the element itself will change position, we have
+                    // to have some way of storing it's original position in
+                    // the DOM. The easiest way is to have a 'flag' node:
+                    nextSibling = parentNode.insertBefore(
+                        document.createTextNode(''),
+                        sortElement.nextSibling
+                    );
+
+                return function() {
+
+                    if (parentNode === this) {
+                        throw new Error(
+                            "You can't sort elements if any one is a descendant of another."
+                        );
+                    }
+
+                    // Insert before flag:
+                    parentNode.insertBefore(this, nextSibling);
+                    // Remove flag:
+                    parentNode.removeChild(nextSibling);
+
+                };
+
+            });
+
+            return sort.call(this, comparator)
+                .each(function(i) {
+                    placements[i].call(getSortable.call(this));
+                });
+
+        };
+
+    })();
+</script>
+<script type="text/javascript">
+    jQuery.fn.setBarSizes = (function() {
+        return function(metricName, maxBarSize, min) {
+            var max = Math.max.apply(Math,
+                $.makeArray($(this).map(function() { return Number($(this).attr('data-sr-' + metricName)); })));
+            var scale = 1.0;
+            while (max > 0.0 && max <= 10.0) {
+                scale = scale * 10.0;
+                max = max * 10.0;
+            }
+            max = (Math.ceil(max / 2) * 2) / scale;
+
+            this.each(function() {
+                var barAnchor = $(this).find('a');
+                var actual = $(this).attr('data-sr-' + metricName);
+                var newHeight = Math.max(Math.round(maxBarSize * (actual - min) / (max - min)), 2);
+                barAnchor.css({ height: newHeight });
+            });
+
+            var unit = "";
+            if (metricName.substr(metricName.length - 4, 4) === "time")
+                unit = "s";
+
+            $('#testview .scale-min-label')
+                .each(function() {
+                    $(this).text(min.toString() + unit);
+                });
+            $('#testview .scale-max-label')
+                .each(function() {
+                    $(this).text(max.toString() + unit);
+                });
+            var mid = max / 2;
+            $('#testview .scale-mid-label')
+                .each(function() {
+                    $(this).text(mid.toString() + unit);
+                });
+        };
+    })();
+
+    function getComparer(metricName, isDesc) {
+        return function(a, b) {
+            var aNumber = Number($(a).attr('data-sr-' + metricName));
+            var bNumber = Number($(b).attr('data-sr-' + metricName));
+            var result = aNumber > bNumber ? 1 : (aNumber < bNumber ? -1 : 0);
+            if (isDesc)
+                result = -1 * result;
+
+            if (result == 0 && metricName != "order")
+                result = getComparer("order", false)(a, b);
+
+            return result;
+        };
+    }
+
+    var currentSort = "";
+
+    function doSort(allowToggleDesc) {
+        var newSort = $("input[name='barSortOrder']:checked").val();
+        if (allowToggleDesc && currentSort == newSort) {
+            $('#barSortDesc').click();
+            doSort(false);
+            return;
+        }
+        currentSort = newSort;
+        $('#testview td.testview-item').sortElements(getComparer(newSort, $('#barSortDesc').is(':checked')));
+    }
+
+
+    function doSetHeights(allowSort) {
+        var selectedMetric = $("input[name='barHeight']:checked").val();
+        $('#testview td.testview-item').setBarSizes(selectedMetric, 60, 0.0);
+
+        if (allowSort && currentSort != selectedMetric) {
+            var $radios = $("input[name='barSortOrder']");
+            $radios.filter('[value=' + selectedMetric + ']').attr('checked', true);
+            $("#barSortDesc").attr("checked", [true]);
+            doSort(false);
+        }
+    }
+
+    function renderPieChart() {
+        $('#chart').highcharts({
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false,
+                type: 'pie'
+            },
+            title: {
+                text: ''
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                        style: {
+                            color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                        }
+                    }
+                }
+            },
+            series: [{
+                name: 'Brands',
+                colorByPoint: true,
+                data: [{
+                    name: 'Succeeded',
+                    y: 3 
+                    }, {
+                    name: 'Failures',
+                    y: 0,   
+                    }, {
+                    name: 'Pending',
+                    y: 0  
+                    }, {
+                    name: 'Ignored',
+                    y: 0   
+                    }, {
+                    name: 'Skipped',
+                    y: 0   
+                }]
+            }]
+        });
+    }
+
+    $(document)
+        .ready(function() {
+            $("input[name='barSortOrder']")
+                .click(function() {
+                    doSort(true);
+                    return true;
+                });
+            $("input[name='barSortDesc']").change(function() { doSort(false); });
+            $("input[name='barHeight']").change(function() { doSetHeights(true); });
+
+            doSort(false);
+            doSetHeights(false);
+
+            $("div.scrollable").css({ 'overflow': 'auto' });
+
+            renderPieChart();
+        });
+</script>
+
+<style type="text/css">
+    body {
+        color: #000000;
+        font-family: Arial, Liberation Sans, DejaVu Sans, sans-serif;
+        line-height: 130%;
+    }
+
+    h1 {
+        font-family: Trebuchet MS, Liberation Sans, DejaVu Sans, sans-serif;
+        font-size: 170%;
+        font-weight: bold;
+    }
+
+    h2 {
+        font-family: Trebuchet MS, Liberation Sans, DejaVu Sans, sans-serif;
+        font-size: 130%;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    h3 {
+        font-family: Trebuchet MS, Liberation Sans, DejaVu Sans, sans-serif;
+        font-size: 120%;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    a.bar {
+        display: block;
+        line-height: 1px;
+        text-decoration: none;
+    }
+
+    .description { font-style: italic; }
+
+    .log {
+        display: block;
+        margin: 0px;
+        white-space: pre-wrap;
+        width: 600px;
+    }
+
+    .errorMessage {
+        color: Red;
+        font-weight: bold;
+        width: 600px;
+    }
+
+    .stackTrace {
+        color: Red;
+        display: block;
+        font-style: italic;
+        white-space: pre-wrap;
+        width: 600px;
+    }
+
+    table.testEvents {
+        border: solid 1px #e8eef4;
+        border-collapse: collapse;
+    }
+
+    table.testEvents td {
+        border: solid 1px #e8eef4;
+        padding: 5px;
+        vertical-align: top;
+    }
+
+    table.testEvents th {
+        background-color: #e8eef4;
+        border: solid 1px #e8eef4;
+        padding: 6px 5px;
+        text-align: left;
+    }
+
+    .comment {
+        font-size: smaller;
+        font-style: italic;
+    }
+
+    .startupBar {
+        background-color: #EEEEEE;
+        cursor: default;
+    }
+
+    .colorSucceeded { background-color: #90ED7B; }
+
+    .colorIgnored { background-color: #FFFF85; }
+
+    .colorPending { background-color: #D47BED; }
+
+    .colorNothingToRun { background-color: #CCCCFF; }
+
+    .colorSkipped { background-color: #CCCCFF; }
+
+    .colorInconclusive { background-color: #7BEDED; }
+
+    .colorCleanupFailed { background-color: #FFCCCC; }
+
+    .colorRandomlyFailed { background-color: #EDB07B; }
+
+    .colorFailed { background-color: #ED5F5F; }
+
+    .colorInitializationFailed { background-color: #FF0000; }
+
+    .colorFrameworkError { background-color: #FF0000; }
+
+    ul.subNodeLinks {
+        margin: 0px;
+        padding-left: 20px;
+    }
+
+    ul.subNodeLinks li { list-style: none; }
+
+    /* views general */
+
+    div.scrollable { /*overflow: auto; - thsi has to be set from js, because of an IE9 bug */ }
+
+    div.viewbox {
+        border: 3px solid #e8eef4;
+        position: relative;
+    }
+
+    div.viewbox table { border: 0px; }
+
+    /* testview */
+
+    #testview { padding-top: 23px; }
+
+    table.testview-items td {
+        padding: 0px 1px 0px 1px;
+        vertical-align: bottom;
+    }
+
+    td.right-padding, td.left-padding {
+        min-width: 25px;
+        width: 25px;
+    }
+
+    table.testview-items a.bar { width: 5px; }
+
+    table.testview-items tr.testview-items-row { height: 60px; }
+
+    /* scale */
+
+    table.vertical-scale {
+        left: 0px;
+        position: absolute;
+        top: 23px;
+        width: 100%;
+        z-index: -100;
+    }
+
+    table.vertical-scale td, tr.horizontal-scale td {
+        font-size: 60%;
+        line-height: normal;
+    }
+
+    table.vertical-scale tr.scale-max, table.vertical-scale tr.scale-mid { height: 30px; }
+
+    tr.horizontal-scale, table.vertical-scale tr.scale-min { height: 12px; }
+
+    td.scale-max-label, td.scale-mid-label, td.scale-min-label {
+        border-top: solid 1px #E6E6E6;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    td.scale-10-label {
+        border-left: solid 1px #E6E6E6;
+        padding-left: 1px;
+        text-align: left;
+        vertical-align: bottom;
+    }
+
+    tr.scale-mid td, tr.scale-min td, tr.scale-max td { border-top: solid 1px #E6E6E6; }
+
+
+    /* bar-control */
+
+    #bar-control {
+        font-size: 60%;
+        line-height: normal;
+        position: absolute;
+        right: 0px;
+        top: 0px;
+    }
+
+    #bar-control label {
+        font-weight: bold;
+        vertical-align: middle;
+    }
+
+    #bar-control .option {
+        text-transform: lowercase;
+        vertical-align: middle;
+    }
+
+    #bar-control input[type="checkbox"] { padding: 0 2px 0 3px; }
+
+    #bar-control input {
+        height: 12px;
+        margin: 0px;
+        padding: 0px;
+        vertical-align: top;
+    }
+
+    #bar-control div {
+        float: right;
+        margin: 3px 5px 3px 5px;
+    }
+
+
+    /* timeline view */
+
+    #timelineview { padding-top: 5px; }
+
+    table.timelineview a { height: 20px; }
+
+    table.timelineview td {
+        border: 0px;
+        padding: 0px 1px 0px 0px;
+        vertical-align: bottom;
+    }
+
+    tr.thread-items-row { height: 25px; }
+
+    tr.thread-items-row td { vertical-align: bottom; }
+
+    td.thread-label {
+        line-height: 18px;
+        padding: 0px 6px 0px 6px;
+        text-align: right;
+        vertical-align: bottom;
+    }
+
+    th.thread-label {
+        line-height: 18px;
+        padding: 3px 6px 0px 6px;
+        text-align: left;
+        vertical-align: bottom;
+    }
+
+    /* SORTABLE START*/
+    table.sortable thead {
+        background-color: #e8eef4;
+        border: solid 1px #e8eef4;
+        padding: 6px 5px;
+        text-align: left;
+    }
+    table.sortable thead a {
+         background:none!important;
+         border:none; 
+         padding:0!important;
+         font: inherit;
+         /*border is optional*/
+         border-bottom:1px solid #444; 
+         cursor: pointer;
+    }
+    table.sortable tbody tr:nth-child(2n) td {
+        border: solid 1px #e8eef4;
+        padding: 5px;
+        vertical-align: top;
+    }
+    table.sortable tbody tr:nth-child(2n+1) td {
+        border: solid 1px #e8eef4;
+        padding: 5px;
+        vertical-align: top;
+    }
+    /* SORTABLE END*/
+</style>
+</head>
+<body>
+<h1>WebUI.Automation.Tests Test Execution Report</h1>
+<ul>
+    <li>Project: WebUI.Automation.Tests</li>
+    <li>Configuration: Default</li>
+    <li>Test Assemblies: WebUI.Automation.Tests.dll</li>
+    <li>Start Time: 2/11/2018 1:26:08 AM</li>
+    <li>Duration: 00:00:58.0143220</li>
+    <li>Test Threads: 1</li>
+</ul>
+
+<h2>Result: all tests passed</h2>
+<table class="testEvents">
+        <tr>
+        <th colspan="2">Success rate</th>
+        <th>Tests</th>
+        <th>Succeeded</th>
+        <th>Failed</th>
+        <th>Pending</th>
+        <th>Ignored</th>
+        <th>Skipped</th>
+    </tr>
+
+        <tr>
+            <td>
+            100%
+    </td>
+    <td>
+        <table class="timelineview" cellpadding="0" cellspacing="0">
+            <tr>
+                    <td>
+                        <a class="bar colorSucceeded"
+                           style="width: 199px;"
+                           title="3 succeeded"
+                           />
+                    </td>
+            </tr>
+        </table>
+    </td>
+    <td>3</td>
+    <td>3</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+
+    </tr>
+
+</table>
+    
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<div id="chart" style="min-width: 310px; height: 400px; max-width: 600px; margin: 0 auto"></div>
+
+<h2>Test Timeline Summary</h2>
+
+<div id="timelineview" class="viewbox">
+    <div class="scrollable">
+        <table cellpadding="0" cellspacing="0">
+            <tr>
+                <th class="thread-label" colspan="2">thread</th>
+            </tr>
+                <tr class="thread-items-row">
+                    <td class="thread-label" title="Machine: MacBook-Air.local">#0</td>
+                    <td colspan="1">
+                        <table class="timelineview" cellpadding="0" cellspacing="0">
+                            <tr>
+
+                                    <td>
+        <a class="bar startupBar"
+           style="width: 3px;"
+                           title="test thread startup"
+>
+            &nbsp;
+        </a>
+    </td>
+
+    <td>
+        <a class="bar colorSucceeded"
+           style="width: 4px;"
+                           title="Valid Gmail login (in Login)"
+                href="#t-1179013158.0"
+>
+            &nbsp;
+        </a>
+    </td>
+    <td>
+        <a class="bar colorSucceeded"
+           style="width: 3px;"
+                           title="Invalid Gmail login (in Login)"
+                href="#t1125072071.0"
+>
+            &nbsp;
+        </a>
+    </td>
+    <td>
+        <a class="bar colorSucceeded"
+           style="width: 7px;"
+                           title="Sign out from Gmail (in Login)"
+                href="#t-327366896.0"
+>
+            &nbsp;
+        </a>
+    </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            <tr class="horizontal-scale">
+                <td>&nbsp;</td>
+                <td class="scale-10-label">0s</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<h2>Test Result View</h2>
+<div id="testview" class="viewbox">
+    <div id="bar-control">
+        <div id="bar-control-sort">
+            <label>sort by:</label>
+            <span class="option"><input type="radio" name="barSortOrder" value="exectime" />Time</span>
+            <span class="option"><input type="radio" name="barSortOrder" value="acttime" />Act Time</span>
+            <span class="option"><input type="radio" name="barSortOrder" value="order" />Execution</span>
+            <span class="option"><input type="radio" name="barSortOrder" value="rescode" checked="checked" />Result</span>
+            <span class="option"><input type="checkbox" name="barSortDesc" id="barSortDesc" checked="checked" />desc</span>
+        </div>
+        <div id="bar-control-heights">
+            <label>heights:</label>
+            <span class="option"><input type="radio" checked="checked" name="barHeight" value="exectime" />Time</span>
+            <span class="option"><input type="radio" name="barHeight" value="acttime" />Act Time</span>
+            
+        </div>
+    </div>
+    <table class="vertical-scale" cellpadding="0" cellspacing="0">
+        <tr class="scale-max">
+            <td class="left-padding scale-max-label">&nbsp;</td>
+            <td colspan="3">&nbsp;</td>
+            <td class="right-padding">&nbsp;</td>
+        </tr>
+        <tr class="scale-mid">
+            <td class="left-padding scale-mid-label">&nbsp;</td>
+            <td colspan="3">&nbsp;</td>
+            <td class="right-padding">&nbsp;</td>
+        </tr>
+        <tr class="scale-min">
+            <td class="left-padding scale-min-label">&nbsp;</td>
+            <td colspan="3">&nbsp;</td>
+            <td class="right-padding">&nbsp;</td>
+        </tr>
+    </table>
+    <div class="scrollable">
+        <table class="testview-items" cellpadding="0" cellspacing="0">
+            <tr class="testview-items-row">
+                <td class="left-padding">&nbsp;</td>
+    <td class="testview-item"
+        data-sr-exectime="23.433427" data-sr-rescode="110" data-sr-order="0" data-sr-acttime="14.547">
+        <a class="bar colorSucceeded"
+           style="height: 60px;"
+           title="Valid Gmail login (in Login)"
+           href="#t-1179013158.0">
+            &nbsp;
+        </a>
+    </td>
+    <td class="testview-item"
+        data-sr-exectime="10.638225" data-sr-rescode="110" data-sr-order="1" data-sr-acttime="2.213">
+        <a class="bar colorSucceeded"
+           style="height: 27px;"
+           title="Invalid Gmail login (in Login)"
+           href="#t1125072071.0">
+            &nbsp;
+        </a>
+    </td>
+    <td class="testview-item"
+        data-sr-exectime="22.392926" data-sr-rescode="110" data-sr-order="2" data-sr-acttime="5.283">
+        <a class="bar colorSucceeded"
+           style="height: 57px;"
+           title="Sign out from Gmail (in Login)"
+           href="#t-327366896.0">
+            &nbsp;
+        </a>
+    </td>
+                <td class="right-padding">&nbsp;</td>
+            </tr>
+            <tr class="horizontal-scale">
+                <td class="left-padding">&nbsp;</td>
+                <td colspan="10">&nbsp;</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<h2>Feature Summary</h2>
+<table class="testEvents">
+        <tr>
+            <th>Feature</th>
+        <th colspan="2">Success rate</th>
+        <th>Tests</th>
+        <th>Succeeded</th>
+        <th>Failed</th>
+        <th>Pending</th>
+        <th>Ignored</th>
+        <th>Skipped</th>
+    </tr>
+
+    <tr>
+            <td>
+                <a href="#f1700341573">Login (target: Chrome)</a>
+            </td>
+            <td>
+            100%
+    </td>
+    <td>
+        <table class="timelineview" cellpadding="0" cellspacing="0">
+            <tr>
+                    <td>
+                        <a class="bar colorSucceeded"
+                           style="width: 199px;"
+                           title="3 succeeded"
+                           />
+                    </td>
+            </tr>
+        </table>
+    </td>
+    <td>3</td>
+    <td>3</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+
+    </tr>
+</table>
+
+<a name="error_summary"/>
+<h2>Error Summary</h2>
+<table class="testEvents">
+        <tr>
+            <th>Test</th>
+        <th colspan="2">Success rate</th>
+        <th>Tests</th>
+        <th>Succeeded</th>
+        <th>Failed</th>
+        <th>Pending</th>
+        <th>Ignored</th>
+        <th>Skipped</th>
+    </tr>
+
+</table>
+
+<h2>Scenario Summary</h2>
+    <a name="f1700341573"/>
+    <h3>Feature: Login (target: Chrome)</h3>
+        <div class="description">
+            <pre>As a Gmail user
+I want to be able to log in to Gmail
+So that I can access my emails</pre>
+        </div>
+    <table class="testEvents">
+            <tr>
+            <th>Test</th>
+        <th colspan="2">Success rate</th>
+        <th>Tests</th>
+        <th>Succeeded</th>
+        <th>Failed</th>
+        <th>Pending</th>
+        <th>Ignored</th>
+        <th>Skipped</th>
+    </tr>
+
+            <tr>
+                <td>
+                            <a href="#t-1179013158.0">Scenario: Valid Gmail login</a>
+
+                </td>
+                    <td>
+            100%
+    </td>
+    <td>
+        <table class="timelineview" cellpadding="0" cellspacing="0">
+            <tr>
+                    <td>
+                        <a class="bar colorSucceeded"
+                           style="width: 199px;"
+                           title="1 succeeded"
+                           />
+                    </td>
+            </tr>
+        </table>
+    </td>
+    <td>1</td>
+    <td>1</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+
+            </tr>
+            <tr>
+                <td>
+                            <a href="#t1125072071.0">Scenario: Invalid Gmail login</a>
+
+                </td>
+                    <td>
+            100%
+    </td>
+    <td>
+        <table class="timelineview" cellpadding="0" cellspacing="0">
+            <tr>
+                    <td>
+                        <a class="bar colorSucceeded"
+                           style="width: 199px;"
+                           title="1 succeeded"
+                           />
+                    </td>
+            </tr>
+        </table>
+    </td>
+    <td>1</td>
+    <td>1</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+
+            </tr>
+            <tr>
+                <td>
+                            <a href="#t-327366896.0">Scenario: Sign out from Gmail</a>
+
+                </td>
+                    <td>
+            100%
+    </td>
+    <td>
+        <table class="timelineview" cellpadding="0" cellspacing="0">
+            <tr>
+                    <td>
+                        <a class="bar colorSucceeded"
+                           style="width: 199px;"
+                           title="1 succeeded"
+                           />
+                    </td>
+            </tr>
+        </table>
+    </td>
+    <td>1</td>
+    <td>1</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+
+            </tr>
+    </table>
+
+<h2>Execution Details</h2>
+    <a name="t-1179013158.0"/>
+    <h3>Scenario: Valid Gmail login (in WebUI.Automation.Tests, Login)</h3>
+        <div class="description">
+            tags: Chrome
+        </div>
+    <ul>
+        <li>Status: Succeeded</li>
+        <li>Start time: 2/11/2018 1:26:09 AM</li>
+        <li>Execution time (sec): 23.433427</li>
+        <li>Thread: #0</li>
+    </ul>
+    <table class="sortable">
+        <tr>
+            <th><a>Index</a></th>
+            <th><a>Steps</a></th>
+            <th><a>Trace</a></th>
+            <th><a>Result</a></th>
+            <th><a>Duration</a></th>
+        </tr>
+            <tr>
+                <td markdown="block">1</td>
+                <td markdown="block">
+                    <pre class="log"></pre>
+                </td>
+                <td markdown="block">
+                    <!-- [Initialization: Feature - Login] -->
+                    <pre class="log">-&gt; Using app.config</pre>
+                </td>
+                <td markdown="block">Succeeded</td>
+                <td markdown="block">0.37s</td>
+            </tr>
+            <tr>
+                <td markdown="block">2</td>
+                <td markdown="block">
+                    <pre class="log">Given I am on the Gmail login screen</pre>
+                </td>
+                <td markdown="block">
+                    <!-- [TestArrange: Scenario - Valid Gmail login] -->
+                    <pre class="log">done: LoginSteps.GivenIAmOnTheGmailLoginScreen() (3.9s)
+<img width=100% height=auto src= tmp46a52ff5.png </img></pre>
+                </td>
+                <td markdown="block">Succeeded</td>
+                <td markdown="block">7.302s</td>
+            </tr>
+            <tr>
+                <td markdown="block">3</td>
+                <td markdown="block">
+                    <pre class="log">When I submit my valid credentials</pre>
+                </td>
+                <td markdown="block">
+                    <!-- [TestAct: Scenario - Valid Gmail login] -->
+                    <pre class="log">userIdentifier = pi.digital.automation@gmail.com, password = Password$1234done: LoginSteps.WhenISubmitMyValidCredentials() (1.6s)
+<img width=100% height=auto src= tmp431c5c47.png </img></pre>
+                </td>
+                <td markdown="block">Succeeded</td>
+                <td markdown="block">14.547s</td>
+            </tr>
+            <tr>
+                <td markdown="block">4</td>
+                <td markdown="block">
+                    <pre class="log">Then I see my Gmail Inbox</pre>
+                </td>
+                <td markdown="block">
+                    <!-- [TestAssert: Scenario - Valid Gmail login] -->
+                    <pre class="log">done: LoginSteps.ThenISeeMyGmailInbox() (0.0s)
+<img width=100% height=auto src= tmp55804d41.png </img></pre>
+                </td>
+                <td markdown="block">Succeeded</td>
+                <td markdown="block">0.817s</td>
+            </tr>
+    </table>
+    <a name="t1125072071.0"/>
+    <h3>Scenario: Invalid Gmail login (in WebUI.Automation.Tests, Login)</h3>
+        <div class="description">
+            tags: Chrome
+        </div>
+    <ul>
+        <li>Status: Succeeded</li>
+        <li>Start time: 2/11/2018 1:26:32 AM</li>
+        <li>Execution time (sec): 10.638225</li>
+        <li>Thread: #0</li>
+    </ul>
+    <table class="sortable">
+        <tr>
+            <th><a>Index</a></th>
+            <th><a>Steps</a></th>
+            <th><a>Trace</a></th>
+            <th><a>Result</a></th>
+            <th><a>Duration</a></th>
+        </tr>
+            <tr>
+                <td markdown="block">1</td>
+                <td markdown="block">
+                    <pre class="log"></pre>
+                </td>
+                <td markdown="block">
+                    <!-- [TestArrange: Scenario - Invalid Gmail login] -->
+                    <pre class="log">Error: ConnectFailure (Connection refused)</pre>
+                </td>
+                <td markdown="block">Succeeded</td>
+                <td markdown="block">1.544s</td>
+            </tr>
+            <tr>
+                <td markdown="block">2</td>
+                <td markdown="block">
+                    <pre class="log">Given I am on the Gmail login screen</pre>
+                </td>
+                <td markdown="block">
+                    <!-- [TestArrange: Scenario - Invalid Gmail login] -->
+                    <pre class="log">done: LoginSteps.GivenIAmOnTheGmailLoginScreen() (4.3s)
+<img width=100% height=auto src= tmp2878f58f.png </img></pre>
+                </td>
+                <td markdown="block">Succeeded</td>
+                <td markdown="block">5.319s</td>
+            </tr>
+            <tr>
+                <td markdown="block">3</td>
+                <td markdown="block">
+                    <pre class="log">When I submit invalid credentials</pre>
+                </td>
+                <td markdown="block">
+                    <!-- [TestAct: Scenario - Invalid Gmail login] -->
+                    <pre class="log">userIdentifier = pi.digital.automation@gmail.com, password = Wrongpasswoddone: LoginSteps.WhenISubmitInvalidCredentials() (1.4s)
+<img width=100% height=auto src= tmp6b52a958.png </img></pre>
+                </td>
+                <td markdown="block">Succeeded</td>
+                <td markdown="block">2.213s</td>
+            </tr>
+            <tr>
+                <td markdown="block">4</td>
+                <td markdown="block">
+                    <pre class="log">Then I remain on the Gmail login screen</pre>
+                </td>
+                <td markdown="block">
+                    <!-- [TestAssert: Scenario - Invalid Gmail login] -->
+                    <pre class="log">done: LoginSteps.ThenIRemainOnTheGmailLoginScreen() (0.0s)
+<img width=100% height=auto src= tmp5849548c.png </img></pre>
+                </td>
+                <td markdown="block">Succeeded</td>
+                <td markdown="block">0.644s</td>
+            </tr>
+            <tr>
+                <td markdown="block">5</td>
+                <td markdown="block">
+                    <pre class="log">And I am shown a message indicating that my credentials are incorrect</pre>
+                </td>
+                <td markdown="block">
+                    <!-- [TestAssert: Scenario - Invalid Gmail login] -->
+                    <pre class="log">done: LoginSteps.ThenIAmShownAMessageIndicatingThatMyCredentialsAreIncorrect() (0.1s)
+<img width=100% height=auto src= tmp644b44c0.png </img></pre>
+                </td>
+                <td markdown="block">Succeeded</td>
+                <td markdown="block">0.669s</td>
+            </tr>
+    </table>
+    <a name="t-327366896.0"/>
+    <h3>Scenario: Sign out from Gmail (in WebUI.Automation.Tests, Login)</h3>
+        <div class="description">
+            tags: Chrome
+        </div>
+    <ul>
+        <li>Status: Succeeded</li>
+        <li>Start time: 2/11/2018 1:26:43 AM</li>
+        <li>Execution time (sec): 22.392926</li>
+        <li>Thread: #0</li>
+    </ul>
+    <table class="sortable">
+        <tr>
+            <th><a>Index</a></th>
+            <th><a>Steps</a></th>
+            <th><a>Trace</a></th>
+            <th><a>Result</a></th>
+            <th><a>Duration</a></th>
+        </tr>
+            <tr>
+                <td markdown="block">1</td>
+                <td markdown="block">
+                    <pre class="log"></pre>
+                </td>
+                <td markdown="block">
+                    <!-- [TestArrange: Scenario - Sign out from Gmail] -->
+                    <pre class="log">Error: ConnectFailure (Connection refused)
+Error: ConnectFailure (Connection refused)
+Error: ConnectFailure (Connection refused)
+Error: ConnectFailure (Connection refused)
+Error: ConnectFailure (Connection refused)
+Error: ConnectFailure (Connection refused)
+Error: ConnectFailure (Connection refused)
+Error: ConnectFailure (Connection refused)</pre>
+                </td>
+                <td markdown="block">Succeeded</td>
+                <td markdown="block">1.291s</td>
+            </tr>
+            <tr>
+                <td markdown="block">2</td>
+                <td markdown="block">
+                    <pre class="log">Given I have logged in to my Gmail</pre>
+                </td>
+                <td markdown="block">
+                    <!-- [TestArrange: Scenario - Sign out from Gmail] -->
+                    <pre class="log">userIdentifier = pi.digital.automation@gmail.com, password = Password$1234done: LoginSteps.GivenIHaveLoggedInToMyGmail() (13.4s)
+<img width=100% height=auto src= tmp1de45d8e.png </img></pre>
+                </td>
+                <td markdown="block">Succeeded</td>
+                <td markdown="block">14.839s</td>
+            </tr>
+            <tr>
+                <td markdown="block">3</td>
+                <td markdown="block">
+                    <pre class="log">When I sign out</pre>
+                </td>
+                <td markdown="block">
+                    <!-- [TestAct: Scenario - Sign out from Gmail] -->
+                    <pre class="log">done: LoginSteps.ThenISignOut() (4.5s)
+<img width=100% height=auto src= tmp7a03f9ed.png </img></pre>
+                </td>
+                <td markdown="block">Succeeded</td>
+                <td markdown="block">5.283s</td>
+            </tr>
+            <tr>
+                <td markdown="block">4</td>
+                <td markdown="block">
+                    <pre class="log">Then I am navigated to the Gmail login screen</pre>
+                </td>
+                <td markdown="block">
+                    <!-- [TestAssert: Scenario - Sign out from Gmail] -->
+                    <pre class="log">done: LoginSteps.ThenIAmNavigatedToTheGmailLoginScreen() (0.0s)
+<img width=100% height=auto src= tmp6ab3288f.png </img></pre>
+                </td>
+                <td markdown="block">Succeeded</td>
+                <td markdown="block">0.701s</td>
+            </tr>
+    </table>
+</body>
+</html>
+</a><div style='position: absolute; top:0px; right:10px; z-index: 1000; text-align: right; font-size: small; color: #FF5555'>
+Generated by an evaluation version of SpecRun.<br />
+This version can be used for evaluation purposes only.<br />
+For obtaining a registered license please visit <a href='http://www.specflow.org/plus'>http://www.specflow.org/plus</a>.
+</div>
