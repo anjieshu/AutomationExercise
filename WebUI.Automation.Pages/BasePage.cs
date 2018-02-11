@@ -1,6 +1,8 @@
-﻿using Automation.Core.SeleniumUtility;
+﻿using Automation.Configuration;
+using Automation.Core.SeleniumUtility;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.PageObjects;
+using OpenQA.Selenium.Support.UI;
 
 namespace WebUI.Automation.Pages
 {
@@ -12,9 +14,13 @@ namespace WebUI.Automation.Pages
 			Toast = new ToastComponent(WebDriver);
 			WarningDialog = new WarningDialogComponent(WebDriver);
 
+            WebWait = new WebDriverWait(WebDriver, Settings.PageTimeout);
+
 			WebDriver.WaitUntilPageIsLoaded();
 			PageFactory.InitElements(WebDriver, this);
 		}
+
+        public WebDriverWait WebWait { get; }
 
 		public WarningDialogComponent WarningDialog { get; set; }
 
@@ -31,6 +37,7 @@ namespace WebUI.Automation.Pages
 		public virtual bool VerifyPage()
 		{
 			WebDriver.WaitUntilElementExists(PageTitle);
+
 			return PageTitle.Text.Equals(PageTitleName);
 		}
 

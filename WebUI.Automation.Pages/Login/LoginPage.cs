@@ -8,20 +8,11 @@ namespace WebUI.Automation.Pages.Login
 {
     public class LoginPage : BasePage
     {
-        private IExtendedWebDriver driver;
-        private WebDriverWait mWait;
-
-        public LoginPage(IExtendedWebDriver webDriver, Options options, WebDriverWait wait) : base(webDriver)
-        {
-            this.driver = webDriver;
-            PageFactory.InitElements(WebDriver, this);
-            mWait = wait;
-            PageTitleName = "Gmail";
-        }
+        public string ErrorMessage = "Wrong password. Try again or click Forgot password to reset it.";
 
         //Locate the elements on the pages
         [FindsBy(How = How.XPath, Using = "//input[@id='identifierId']")]
-        public IWebElement email_phone;
+        public IWebElement userID;
 
         [FindsBy(How = How.Id, Using = "identifierNext")]
         public IWebElement identifierNext;
@@ -35,17 +26,20 @@ namespace WebUI.Automation.Pages.Login
         [FindsBy(How = How.XPath, Using = "//*[@id=\"password\"]/div[2]/div[2]")]
         public IWebElement wrongPasswordMessage;
 
-        public string ErrorMessage = "Wrong password. Try again or click Forgot password to reset it.";
+        public LoginPage(IExtendedWebDriver webDriver, Options options) : base(webDriver)
+        {
+            PageTitleName = "Gmail";
+        }
+
         //Define basic methods on the page
         public string RetrunErrorMessage()
         {
-            string errorMessage = wrongPasswordMessage.Text;
-            return errorMessage;
+            return wrongPasswordMessage.Text;
         }
 
         public void SetUserIdentifier(string strUserId)
         {
-            email_phone.SendKeys(strUserId);
+            userID.SendKeys(strUserId);
         }
 
         public void SetPassword(string strPassword)
@@ -63,25 +57,28 @@ namespace WebUI.Automation.Pages.Login
             login.Click();
         }
 
-        //Login method
+        // Login method
         public void LoginToGmail(string strUserId, string strPassword)
         {
-            Console.WriteLine("userIdentifier = "+strUserId+", password = "+strPassword);
+            Console.WriteLine("userIdentifier=" + strUserId + ", password=" + strPassword);
             SetUserIdentifier(strUserId);
             ClickNext();
-            mWait.Until(ExpectedConditions.ElementToBeClickable(password));
+            WebWait.Until(ExpectedConditions.ElementToBeClickable(password));
             SetPassword(strPassword);
+            WebWait.Until(ExpectedConditions.ElementToBeClickable(login));
             ClickLogin();
         }
-        //Verify Error Message
+
+        // Verify Error Message
         public bool VerifyErrorMessage()
         {
             return RetrunErrorMessage().Equals(ErrorMessage);
         }
+
         public override bool VerifyPage()
-        {   
-            Console.WriteLine("Verify page: Page title is " + driver.Title);
-            mWait.Until(ExpectedConditions.TitleIs(PageTitleName));
+        {
+            Console.WriteLine("Login VerifyPage: Page title is " + WebDriver.Title);
+            WebWait.Until(ExpectedConditions.TitleIs(PageTitleName));
             return true;
         }
     }

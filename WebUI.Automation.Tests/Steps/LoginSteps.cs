@@ -4,7 +4,6 @@ using TechTalk.SpecFlow;
 using WebUI.Automation.Pages;
 using WebUI.Automation.Pages.Login;
 using WebUI.Automation.Pages.Inbox;
-using OpenQA.Selenium.Support.UI;
 using NUnit.Framework;
 
 namespace WebUI.Automation.Tests.Steps
@@ -18,19 +17,16 @@ namespace WebUI.Automation.Tests.Steps
         public string mInvalidPasswd;
         public LoginPage mLoginPage;
         public InboxPage mInboxPage;
-        public WebDriverWait mWait;
 
-        public LoginSteps(IExtendedWebDriver webDriver, Options options, WebDriverWait wait) : base(webDriver, options, wait)
-		{
+        public LoginSteps(IExtendedWebDriver webDriver, Options options) : base(webDriver, options)
+	    {
             mUrl = options.SiteUri.ToString();
             mValidUser = Constants.VALID_USER_NAME;
             mValidPasswd = Constants.VALID_PASSWORD;
             mInvalidPasswd = Constants.INVALID_PASSWORD;
-            mLoginPage = new LoginPage(WebDriver, options, wait);
-            mInboxPage = new InboxPage(WebDriver, options, wait);
-            mWait = wait;
-         
-		}
+            mLoginPage = new LoginPage(WebDriver, options);
+            mInboxPage = new InboxPage(WebDriver, options);
+	    }
 
         [Given(@"I am on the Gmail login screen")]
         public void GivenIAmOnTheGmailLoginScreen()
@@ -47,7 +43,6 @@ namespace WebUI.Automation.Tests.Steps
         [Then(@"I see my Gmail Inbox")]
         public void ThenISeeMyGmailInbox()
         {
-
             Assert.IsTrue(mInboxPage.VerifyPage());
         }
 
@@ -83,7 +78,6 @@ namespace WebUI.Automation.Tests.Steps
         {
             mInboxPage.menu.Click();
             mInboxPage.signOut.Click();
-
         }
 
         [Then(@"I am navigated to the Gmail login screen")]
