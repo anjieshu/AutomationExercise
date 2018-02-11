@@ -18,8 +18,7 @@ namespace WebUI.Automation.Pages
 
 		public WarningDialogComponent WarningDialog { get; set; }
 
-		//[FindsBy(How = How.CssSelector, Using = "[data-auto='PageTitle']")]
-        [FindsBy(How = How.XPath, Using = "/html/head/title")]
+		[FindsBy(How = How.CssSelector, Using = "[data-auto='PageTitle']")]
 		public IWebElement PageTitle { get; set; }
 
 		public string PageTitleName { get; set; }

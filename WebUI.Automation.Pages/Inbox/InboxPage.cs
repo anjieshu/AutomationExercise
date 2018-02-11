@@ -16,6 +16,7 @@ namespace WebUI.Automation.Pages.Inbox
             this.driver = webDriver;
             PageFactory.InitElements(WebDriver, this);
             mWait = wait;
+            PageTitleName = "Inbox";
         }
 
         //Locate the elements on the pages
@@ -29,6 +30,12 @@ namespace WebUI.Automation.Pages.Inbox
         {
             string inboxUrl = driver.Url;
             return inboxUrl;
+        }
+        public override bool VerifyPage()
+        {   
+            System.Console.Write("Verify page: Page title is "+ driver.Title);
+            mWait.Until(ExpectedConditions.TitleContains(PageTitleName));
+            return true;
         }
     }
 }

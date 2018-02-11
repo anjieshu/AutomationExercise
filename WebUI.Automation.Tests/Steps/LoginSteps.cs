@@ -47,8 +47,8 @@ namespace WebUI.Automation.Tests.Steps
         [Then(@"I see my Gmail Inbox")]
         public void ThenISeeMyGmailInbox()
         {
-            mWait.Until(ExpectedConditions.TitleContains("Inbox"));
-            Assert.AreEqual(mInboxPage.GetMailInboxUrl(), "https://mail.google.com/mail/#inbox");  
+
+            Assert.IsTrue(mInboxPage.VerifyPage());
         }
 
         [When(@"I submit invalid credentials")]
@@ -60,22 +60,22 @@ namespace WebUI.Automation.Tests.Steps
         [Then(@"I remain on the Gmail login screen")]
         public void ThenIRemainOnTheGmailLoginScreen()
         {
-            Assert.AreEqual(WebDriver.Title,"Gmail");
+            Assert.IsTrue(mLoginPage.VerifyPage());
         }
 
         [Then(@"I am shown a message indicating that my credentials are incorrect")]
         public void ThenIAmShownAMessageIndicatingThatMyCredentialsAreIncorrect()
         {
-            Assert.AreEqual(mLoginPage.RetrunErrorMessage(),"Wrong password. Try again or click Forgot password to reset it.");
+            Assert.IsTrue(mLoginPage.VerifyErrorMessage());
         }
 
         [Given(@"I have logged in to my Gmail")]
         public void GivenIHaveLoggedInToMyGmail()
         {
             WebDriver.Navigate().GoToUrl(mUrl);
+            Assert.IsTrue(mLoginPage.VerifyPage());
             mLoginPage.LoginToGmail(mValidUser, mValidPasswd);
-            mWait.Until(ExpectedConditions.TitleContains("Inbox"));
-
+            Assert.IsTrue(mInboxPage.VerifyPage());
         }
 
         [When(@"I sign out")]
@@ -89,7 +89,7 @@ namespace WebUI.Automation.Tests.Steps
         [Then(@"I am navigated to the Gmail login screen")]
         public void ThenIAmNavigatedToTheGmailLoginScreen()
         {
-            Assert.AreEqual(WebDriver.Title,"Gmail");
+            Assert.IsTrue(mLoginPage.VerifyPage());
         }
 	}
 }

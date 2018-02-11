@@ -1,4 +1,5 @@
-﻿using Automation.Core.SeleniumUtility;
+﻿using System;
+using Automation.Core.SeleniumUtility;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.PageObjects;
 using OpenQA.Selenium.Support.UI;
@@ -34,6 +35,7 @@ namespace WebUI.Automation.Pages.Login
         [FindsBy(How = How.XPath, Using = "//*[@id=\"password\"]/div[2]/div[2]")]
         public IWebElement wrongPasswordMessage;
 
+        public string ErrorMessage = "Wrong password. Try again or click Forgot password to reset it.";
         //Define basic methods on the page
         public string RetrunErrorMessage()
         {
@@ -64,13 +66,23 @@ namespace WebUI.Automation.Pages.Login
         //Login method
         public void LoginToGmail(string strUserId, string strPassword)
         {
-            System.Console.Write("userIdentifier = "+strUserId+", password = "+strPassword);
+            Console.WriteLine("userIdentifier = "+strUserId+", password = "+strPassword);
             SetUserIdentifier(strUserId);
             ClickNext();
             mWait.Until(ExpectedConditions.ElementToBeClickable(password));
             SetPassword(strPassword);
             ClickLogin();
         }
-
+        //Verify Error Message
+        public bool VerifyErrorMessage()
+        {
+            return RetrunErrorMessage().Equals(ErrorMessage);
+        }
+        public override bool VerifyPage()
+        {   
+            Console.WriteLine("Verify page: Page title is " + driver.Title);
+            mWait.Until(ExpectedConditions.TitleIs(PageTitleName));
+            return true;
+        }
     }
 }
