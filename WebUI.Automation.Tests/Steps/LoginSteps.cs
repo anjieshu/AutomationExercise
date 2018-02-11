@@ -3,6 +3,7 @@ using Automation.Core.SeleniumUtility;
 using TechTalk.SpecFlow;
 using WebUI.Automation.Pages;
 using WebUI.Automation.Pages.Login;
+using WebUI.Automation.Pages.Inbox;
 using OpenQA.Selenium.Support.UI;
 using NUnit.Framework;
 
@@ -16,6 +17,7 @@ namespace WebUI.Automation.Tests.Steps
         public string mValidPasswd;
         public string mInvalidPasswd;
         public LoginPage mLoginPage;
+        public InboxPage mInboxPage;
         public WebDriverWait mWait;
 
         public LoginSteps(IExtendedWebDriver webDriver, Options options, WebDriverWait wait) : base(webDriver, options, wait)
@@ -25,6 +27,7 @@ namespace WebUI.Automation.Tests.Steps
             mValidPasswd = Constants.VALID_PASSWORD;
             mInvalidPasswd = Constants.INVALID_PASSWORD;
             mLoginPage = new LoginPage(WebDriver, options, wait);
+            mInboxPage = new InboxPage(WebDriver, options, wait);
             mWait = wait;
          
 		}
@@ -45,7 +48,7 @@ namespace WebUI.Automation.Tests.Steps
         public void ThenISeeMyGmailInbox()
         {
             mWait.Until(ExpectedConditions.TitleContains("Inbox"));
-            Assert.AreEqual(mLoginPage.GetMailInboxUrl(), "https://mail.google.com/mail/#inbox");  
+            Assert.AreEqual(mInboxPage.GetMailInboxUrl(), "https://mail.google.com/mail/#inbox");  
         }
 
         [When(@"I submit invalid credentials")]
@@ -78,8 +81,8 @@ namespace WebUI.Automation.Tests.Steps
         [When(@"I sign out")]
         public void ThenISignOut()
         {
-            mLoginPage.menu.Click();
-            mLoginPage.signOut.Click();
+            mInboxPage.menu.Click();
+            mInboxPage.signOut.Click();
 
         }
 

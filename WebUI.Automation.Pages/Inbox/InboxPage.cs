@@ -1,10 +1,34 @@
 ﻿using System;
+using Automation.Core.SeleniumUtility;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Support.PageObjects;
+using OpenQA.Selenium.Support.UI;
+
+
 namespace WebUI.Automation.Pages.Inbox
 {
-    public class InboxPage
+    public class InboxPage : BasePage
     {
-        public InboxPage()
+        private IExtendedWebDriver driver;
+        private WebDriverWait mWait;
+        public InboxPage(IExtendedWebDriver webDriver, Options options, WebDriverWait wait) : base(webDriver)
         {
+            this.driver = webDriver;
+            PageFactory.InitElements(WebDriver, this);
+            mWait = wait;
+        }
+
+        //Locate the elements on the pages
+        [FindsBy(How = How.XPath, Using = "//div/a/span[@class='gb_ab gbii']")]
+        public IWebElement menu;
+
+        [FindsBy(How = How.XPath, Using = "//*[@id='gb_71']")]
+        public IWebElement signOut;
+
+        public string GetMailInboxUrl()
+        {
+            string inboxUrl = driver.Url;
+            return inboxUrl;
         }
     }
 }

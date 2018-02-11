@@ -34,23 +34,11 @@ namespace WebUI.Automation.Pages.Login
         [FindsBy(How = How.XPath, Using = "//*[@id=\"password\"]/div[2]/div[2]")]
         public IWebElement wrongPasswordMessage;
 
-        [FindsBy(How = How.XPath, Using = "//div/a/span[@class='gb_ab gbii']")]
-        public IWebElement menu;
-
-        [FindsBy(How = How.XPath, Using = "//*[@id='gb_71']")]
-        public IWebElement signOut;
-
         //Define basic methods on the page
         public string RetrunErrorMessage()
         {
             string errorMessage = wrongPasswordMessage.Text;
             return errorMessage;
-        }
-
-        public string GetMailInboxUrl()
-        {
-            string inboxUrl = driver.Url;
-            return inboxUrl;
         }
 
         public void SetUserIdentifier(string strUserId)

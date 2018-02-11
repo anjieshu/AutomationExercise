@@ -22,7 +22,6 @@ namespace WebUI.Automation.Pages
         [FindsBy(How = How.XPath, Using = "/html/head/title")]
 		public IWebElement PageTitle { get; set; }
 
-
 		public string PageTitleName { get; set; }
 
 		protected IWebElement LoadingOverlay => WebDriver.FindElementByDataAuto("LoadingOverlay");
