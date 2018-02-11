@@ -504,8 +504,8 @@
     <li>Project: WebUI.Automation.Tests</li>
     <li>Configuration: Default</li>
     <li>Test Assemblies: WebUI.Automation.Tests.dll</li>
-    <li>Start Time: 2/11/2018 1:26:08 AM</li>
-    <li>Duration: 00:00:58.0143220</li>
+    <li>Start Time: 11/02/2018 9:47:12 PM</li>
+    <li>Duration: 00:00:43.7904830</li>
     <li>Test Threads: 1</li>
 </ul>
 
@@ -561,7 +561,7 @@
                 <th class="thread-label" colspan="2">thread</th>
             </tr>
                 <tr class="thread-items-row">
-                    <td class="thread-label" title="Machine: MacBook-Air.local">#0</td>
+                    <td class="thread-label" title="Machine: Johnnys-MacBook-Pro.local">#0</td>
                     <td colspan="1">
                         <table class="timelineview" cellpadding="0" cellspacing="0">
                             <tr>
@@ -577,7 +577,7 @@
 
     <td>
         <a class="bar colorSucceeded"
-           style="width: 4px;"
+           style="width: 3px;"
                            title="Valid Gmail login (in Login)"
                 href="#t-1179013158.0"
 >
@@ -595,7 +595,7 @@
     </td>
     <td>
         <a class="bar colorSucceeded"
-           style="width: 7px;"
+           style="width: 8px;"
                            title="Sign out from Gmail (in Login)"
                 href="#t-327366896.0"
 >
@@ -654,27 +654,27 @@
             <tr class="testview-items-row">
                 <td class="left-padding">&nbsp;</td>
     <td class="testview-item"
-        data-sr-exectime="23.433427" data-sr-rescode="110" data-sr-order="0" data-sr-acttime="14.547">
+        data-sr-exectime="16.330417" data-sr-rescode="110" data-sr-order="0" data-sr-acttime="1.913">
         <a class="bar colorSucceeded"
-           style="height: 60px;"
+           style="height: 54px;"
            title="Valid Gmail login (in Login)"
            href="#t-1179013158.0">
             &nbsp;
         </a>
     </td>
     <td class="testview-item"
-        data-sr-exectime="10.638225" data-sr-rescode="110" data-sr-order="1" data-sr-acttime="2.213">
+        data-sr-exectime="8.408057" data-sr-rescode="110" data-sr-order="1" data-sr-acttime="1.886">
         <a class="bar colorSucceeded"
-           style="height: 27px;"
+           style="height: 28px;"
            title="Invalid Gmail login (in Login)"
            href="#t1125072071.0">
             &nbsp;
         </a>
     </td>
     <td class="testview-item"
-        data-sr-exectime="22.392926" data-sr-rescode="110" data-sr-order="2" data-sr-acttime="5.283">
+        data-sr-exectime="18.044978" data-sr-rescode="110" data-sr-order="2" data-sr-acttime="5.07">
         <a class="bar colorSucceeded"
-           style="height: 57px;"
+           style="height: 60px;"
            title="Sign out from Gmail (in Login)"
            href="#t-327366896.0">
             &nbsp;
@@ -862,8 +862,8 @@ So that I can access my emails</pre>
         </div>
     <ul>
         <li>Status: Succeeded</li>
-        <li>Start time: 2/11/2018 1:26:09 AM</li>
-        <li>Execution time (sec): 23.433427</li>
+        <li>Start time: 11/02/2018 9:47:13 PM</li>
+        <li>Execution time (sec): 16.330417</li>
         <li>Thread: #0</li>
     </ul>
     <table class="sortable">
@@ -884,7 +884,7 @@ So that I can access my emails</pre>
                     <pre class="log">-&gt; Using app.config</pre>
                 </td>
                 <td markdown="block">Succeeded</td>
-                <td markdown="block">0.37s</td>
+                <td markdown="block">0.233s</td>
             </tr>
             <tr>
                 <td markdown="block">2</td>
@@ -893,11 +893,11 @@ So that I can access my emails</pre>
                 </td>
                 <td markdown="block">
                     <!-- [TestArrange: Scenario - Valid Gmail login] -->
-                    <pre class="log">done: LoginSteps.GivenIAmOnTheGmailLoginScreen() (3.9s)
-<img width=100% height=auto src= tmp46a52ff5.png </img></pre>
+                    <pre class="log">done: LoginSteps.GivenIAmOnTheGmailLoginScreen() (3.2s)
+<img width=100% height=auto src= tmp6a228f5b.png </img></pre>
                 </td>
                 <td markdown="block">Succeeded</td>
-                <td markdown="block">7.302s</td>
+                <td markdown="block">5.238s</td>
             </tr>
             <tr>
                 <td markdown="block">3</td>
@@ -906,11 +906,12 @@ So that I can access my emails</pre>
                 </td>
                 <td markdown="block">
                     <!-- [TestAct: Scenario - Valid Gmail login] -->
-                    <pre class="log">userIdentifier = pi.digital.automation@gmail.com, password = Password$1234done: LoginSteps.WhenISubmitMyValidCredentials() (1.6s)
-<img width=100% height=auto src= tmp431c5c47.png </img></pre>
+                    <pre class="log">userIdentifier=pi.digital.automation@gmail.com, password=Password$1234
+done: LoginSteps.WhenISubmitMyValidCredentials() (1.2s)
+<img width=100% height=auto src= tmp2a8ae947.png </img></pre>
                 </td>
                 <td markdown="block">Succeeded</td>
-                <td markdown="block">14.547s</td>
+                <td markdown="block">1.913s</td>
             </tr>
             <tr>
                 <td markdown="block">4</td>
@@ -919,11 +920,13 @@ So that I can access my emails</pre>
                 </td>
                 <td markdown="block">
                     <!-- [TestAssert: Scenario - Valid Gmail login] -->
-                    <pre class="log">done: LoginSteps.ThenISeeMyGmailInbox() (0.0s)
-<img width=100% height=auto src= tmp55804d41.png </img></pre>
+                    <pre class="log">Inbox VerifyPage: Page title is Inbox (1) - pi.digital.automation@gmail.com - Gmail
+
+done: LoginSteps.ThenISeeMyGmailInbox() (7.8s)
+<img width=100% height=auto src= tmp1cf878d9.png </img></pre>
                 </td>
                 <td markdown="block">Succeeded</td>
-                <td markdown="block">0.817s</td>
+                <td markdown="block">8.625s</td>
             </tr>
     </table>
     <a name="t1125072071.0"/>
@@ -933,8 +936,8 @@ So that I can access my emails</pre>
         </div>
     <ul>
         <li>Status: Succeeded</li>
-        <li>Start time: 2/11/2018 1:26:32 AM</li>
-        <li>Execution time (sec): 10.638225</li>
+        <li>Start time: 11/02/2018 9:47:30 PM</li>
+        <li>Execution time (sec): 8.408057</li>
         <li>Thread: #0</li>
     </ul>
     <table class="sortable">
@@ -955,7 +958,7 @@ So that I can access my emails</pre>
                     <pre class="log">Error: ConnectFailure (Connection refused)</pre>
                 </td>
                 <td markdown="block">Succeeded</td>
-                <td markdown="block">1.544s</td>
+                <td markdown="block">0.958s</td>
             </tr>
             <tr>
                 <td markdown="block">2</td>
@@ -964,11 +967,11 @@ So that I can access my emails</pre>
                 </td>
                 <td markdown="block">
                     <!-- [TestArrange: Scenario - Invalid Gmail login] -->
-                    <pre class="log">done: LoginSteps.GivenIAmOnTheGmailLoginScreen() (4.3s)
-<img width=100% height=auto src= tmp2878f58f.png </img></pre>
+                    <pre class="log">done: LoginSteps.GivenIAmOnTheGmailLoginScreen() (3.2s)
+<img width=100% height=auto src= tmp428f8b56.png </img></pre>
                 </td>
                 <td markdown="block">Succeeded</td>
-                <td markdown="block">5.319s</td>
+                <td markdown="block">4.1s</td>
             </tr>
             <tr>
                 <td markdown="block">3</td>
@@ -977,11 +980,12 @@ So that I can access my emails</pre>
                 </td>
                 <td markdown="block">
                     <!-- [TestAct: Scenario - Invalid Gmail login] -->
-                    <pre class="log">userIdentifier = pi.digital.automation@gmail.com, password = Wrongpasswoddone: LoginSteps.WhenISubmitInvalidCredentials() (1.4s)
-<img width=100% height=auto src= tmp6b52a958.png </img></pre>
+                    <pre class="log">userIdentifier=pi.digital.automation@gmail.com, password=WrongPassword
+done: LoginSteps.WhenISubmitInvalidCredentials() (1.2s)
+<img width=100% height=auto src= tmp53573604.png </img></pre>
                 </td>
                 <td markdown="block">Succeeded</td>
-                <td markdown="block">2.213s</td>
+                <td markdown="block">1.886s</td>
             </tr>
             <tr>
                 <td markdown="block">4</td>
@@ -990,11 +994,12 @@ So that I can access my emails</pre>
                 </td>
                 <td markdown="block">
                     <!-- [TestAssert: Scenario - Invalid Gmail login] -->
-                    <pre class="log">done: LoginSteps.ThenIRemainOnTheGmailLoginScreen() (0.0s)
-<img width=100% height=auto src= tmp5849548c.png </img></pre>
+                    <pre class="log">Login VerifyPage: Page title is Gmail
+done: LoginSteps.ThenIRemainOnTheGmailLoginScreen() (0.0s)
+<img width=100% height=auto src= tmp6ad47ae6.png </img></pre>
                 </td>
                 <td markdown="block">Succeeded</td>
-                <td markdown="block">0.644s</td>
+                <td markdown="block">0.674s</td>
             </tr>
             <tr>
                 <td markdown="block">5</td>
@@ -1003,11 +1008,11 @@ So that I can access my emails</pre>
                 </td>
                 <td markdown="block">
                     <!-- [TestAssert: Scenario - Invalid Gmail login] -->
-                    <pre class="log">done: LoginSteps.ThenIAmShownAMessageIndicatingThatMyCredentialsAreIncorrect() (0.1s)
-<img width=100% height=auto src= tmp644b44c0.png </img></pre>
+                    <pre class="log">done: LoginSteps.ThenIAmShownAMessageIndicatingThatMyCredentialsAreIncorrect() (0.0s)
+<img width=100% height=auto src= tmp33f795ef.png </img></pre>
                 </td>
                 <td markdown="block">Succeeded</td>
-                <td markdown="block">0.669s</td>
+                <td markdown="block">0.64s</td>
             </tr>
     </table>
     <a name="t-327366896.0"/>
@@ -1017,8 +1022,8 @@ So that I can access my emails</pre>
         </div>
     <ul>
         <li>Status: Succeeded</li>
-        <li>Start time: 2/11/2018 1:26:43 AM</li>
-        <li>Execution time (sec): 22.392926</li>
+        <li>Start time: 11/02/2018 9:47:38 PM</li>
+        <li>Execution time (sec): 18.044978</li>
         <li>Thread: #0</li>
     </ul>
     <table class="sortable">
@@ -1043,10 +1048,14 @@ Error: ConnectFailure (Connection refused)
 Error: ConnectFailure (Connection refused)
 Error: ConnectFailure (Connection refused)
 Error: ConnectFailure (Connection refused)
+Error: ConnectFailure (Connection refused)
+Error: ConnectFailure (Connection refused)
+Error: ConnectFailure (Connection refused)
+Error: ConnectFailure (Connection refused)
 Error: ConnectFailure (Connection refused)</pre>
                 </td>
                 <td markdown="block">Succeeded</td>
-                <td markdown="block">1.291s</td>
+                <td markdown="block">0.915s</td>
             </tr>
             <tr>
                 <td markdown="block">2</td>
@@ -1055,11 +1064,15 @@ Error: ConnectFailure (Connection refused)</pre>
                 </td>
                 <td markdown="block">
                     <!-- [TestArrange: Scenario - Sign out from Gmail] -->
-                    <pre class="log">userIdentifier = pi.digital.automation@gmail.com, password = Password$1234done: LoginSteps.GivenIHaveLoggedInToMyGmail() (13.4s)
-<img width=100% height=auto src= tmp1de45d8e.png </img></pre>
+                    <pre class="log">Login VerifyPage: Page title is Gmail
+userIdentifier=pi.digital.automation@gmail.com, password=Password$1234
+Inbox VerifyPage: Page title is Gmail
+
+done: LoginSteps.GivenIHaveLoggedInToMyGmail() (10.2s)
+<img width=100% height=auto src= tmp30c9005f.png </img></pre>
                 </td>
                 <td markdown="block">Succeeded</td>
-                <td markdown="block">14.839s</td>
+                <td markdown="block">11.13s</td>
             </tr>
             <tr>
                 <td markdown="block">3</td>
@@ -1068,11 +1081,11 @@ Error: ConnectFailure (Connection refused)</pre>
                 </td>
                 <td markdown="block">
                     <!-- [TestAct: Scenario - Sign out from Gmail] -->
-                    <pre class="log">done: LoginSteps.ThenISignOut() (4.5s)
-<img width=100% height=auto src= tmp7a03f9ed.png </img></pre>
+                    <pre class="log">done: LoginSteps.ThenISignOut() (4.0s)
+<img width=100% height=auto src= tmp7e7552ac.png </img></pre>
                 </td>
                 <td markdown="block">Succeeded</td>
-                <td markdown="block">5.283s</td>
+                <td markdown="block">5.07s</td>
             </tr>
             <tr>
                 <td markdown="block">4</td>
@@ -1081,11 +1094,12 @@ Error: ConnectFailure (Connection refused)</pre>
                 </td>
                 <td markdown="block">
                     <!-- [TestAssert: Scenario - Sign out from Gmail] -->
-                    <pre class="log">done: LoginSteps.ThenIAmNavigatedToTheGmailLoginScreen() (0.0s)
-<img width=100% height=auto src= tmp6ab3288f.png </img></pre>
+                    <pre class="log">Login VerifyPage: Page title is Gmail
+done: LoginSteps.ThenIAmNavigatedToTheGmailLoginScreen() (0.0s)
+<img width=100% height=auto src= tmpa91ab72.png </img></pre>
                 </td>
                 <td markdown="block">Succeeded</td>
-                <td markdown="block">0.701s</td>
+                <td markdown="block">0.744s</td>
             </tr>
     </table>
 </body>
